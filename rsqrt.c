@@ -78,21 +78,6 @@ static inline unsigned clz(uint32_t x) {
     return n;
 }
 
-static inline uint32_t newton_step(uint32_t x, uint32_t y) {
-    uint32_t y2 = ((uint64_t)y * y) >> 16;
-    uint32_t xy2 = ((uint64_t)x * y2) >> 16;
-    uint32_t three_scaled = 3u << 16;
-    
-    if (xy2 > three_scaled) {
-        xy2 = three_scaled;
-    }
-    
-    uint32_t factor = three_scaled - xy2;
-    uint64_t result = (uint64_t)y * factor;
-    
-    return (uint32_t)(result >> 17);
-}
-
 uint32_t rsqrt(uint32_t x) {
     if (x == 0) return 0xFFFFFFFF;
     
