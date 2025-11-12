@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <stdint.h>
-#include <stddef.h> // Cần thiết cho kiểu size_t
-
+#include <stddef.h>
+#include "rsqrt.h"
 
 #define printstr(ptr, length)                   \
     do {                                        \
@@ -98,6 +98,11 @@ uint32_t __mulsi3(uint32_t a, uint32_t b)
 {
     return umul(a, b);
 }
+/* Provide __udivsi3 for GCC - used by rsqrt.c */
+uint32_t __udivsi3(uint32_t dividend, uint32_t divisor)
+{
+    return (uint32_t)udiv(dividend, divisor);
+}
 
 /* Simple integer to hex string conversion */
 static void print_hex(unsigned long val)
@@ -145,7 +150,24 @@ static void print_dec(unsigned long val)
     p++;
     printstr(p, (buf + sizeof(buf) - p));
 }
+void print_dec_inline(unsigned long val)
+{
+    char buf[20];
+    char *p = buf + sizeof(buf);
 
+    *--p = '\0';
+
+    if (val == 0) {
+        *--p = '0';
+    } else {
+        while (val > 0) {
+            *--p = '0' + umod(val, 10);
+            val = udiv(val, 10);
+        }
+    }
+
+    printstr(p, (buf + sizeof(buf) - 1 - p));  // no newline
+}
 /* ================================================
  * HOMEWORK 1: UF8 IMPLEMENTATION
  * ================================================ */
@@ -308,7 +330,36 @@ int main(void) {
     print_dec((unsigned long) cycles_elapsed);
     TEST_LOGGER("Instructions: ");
     print_dec((unsigned long) instret_elapsed);
+    TEST_LOGGER("\n=== Start Test Suite for Quiz 3 Problem C: Fast rsqrt ===\n");
+    // Test rsqrt accuracy
+    start_cycles = get_cycles();
+    start_instret = get_instret();
+    
+    bool rsqrt_passed = test_rsqrt_accuracy();
+    
+    end_cycles = get_cycles();
+    end_instret = get_instret();
+    cycles_elapsed = end_cycles - start_cycles;
+    instret_elapsed = end_instret - start_instret;
+    
+    if (rsqrt_passed) {
+        TEST_LOGGER("== rsqrt accuracy: PASSED ==\n");
+    } else {
+        TEST_LOGGER("== rsqrt accuracy: FAILED ==\n");
+    }
+    
+    bool distance_passed = test_fast_distance_3d();
+ 
+    if (distance_passed) {
+        TEST_LOGGER("== fast_distance_3d: PASSED ==\n");
+    } else {
+        TEST_LOGGER("== fast_distance_3d: FAILED ==\n");
+    }
+    
+    TEST_LOGGER("Cycles: ");
+    print_dec((unsigned long)cycles_elapsed);
+    TEST_LOGGER("Instructions: ");
+    print_dec((unsigned long)instret_elapsed);
     TEST_LOGGER("\n=== All Tests Completed ===\n");
-
     return 0; // Sẽ thoát về start.S, sau đó gọi ecall (sys_exit)
 }
