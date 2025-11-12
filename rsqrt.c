@@ -78,32 +78,29 @@ static inline unsigned clz(uint32_t x) {
     return n;
 }
 
+static inline uint32_t newton_step(uint32_t x, uint32_t y) {
+    uint64_t y64 = y;
+    uint64_t y2 = (y64 * y64) >> 16;
+    uint64_t xy2 = x * y2;
+    return (uint32_t)((y64 * ((3U << 16) - xy2)) >> 17);
+}
+
+/* RSQRT với newton_step() */
 uint32_t rsqrt(uint32_t x) {
     if (x == 0) return 0xFFFFFFFF;
     
-    // Tìm exponent (MSB position)
     uint32_t exp = 31 - clz(x);
-    
-    // Lookup table
     uint32_t y_base = rsqrt_table[exp];
     uint32_t y_next = (exp == 31) ? 1 : rsqrt_table[exp + 1];
     
-    // Linear interpolation - DÙNG SHIFT thay vì CHIA!
     uint32_t delta = y_base - y_next;
     uint64_t frac_num_scaled = (uint64_t)(x - (1U << exp)) << 16;
     uint32_t frac = (uint32_t)(frac_num_scaled >> exp);
-    uint32_t interp = (uint32_t)(((uint64_t)delta * frac) >> 16);
-    uint32_t y = y_base - interp;
+    uint32_t y = y_base - (uint32_t)(((uint64_t)delta * frac) >> 16);
     
-    // Newton iteration 1
-    uint32_t y2 = (uint32_t)(((uint64_t)y * y) >> 16);
-    uint32_t xy2 = (uint32_t)((uint64_t)x * y2);
-    y = (uint32_t)(((uint64_t)y * ((3U << 16) - xy2)) >> 17);
-    
-    // Newton iteration 2
-    y2 = (uint32_t)(((uint64_t)y * y) >> 16);
-    xy2 = (uint32_t)((uint64_t)x * y2);
-    y = (uint32_t)(((uint64_t)y * ((3U << 16) - xy2)) >> 17);
+    // ❌ GỌI FUNCTION 2 lần - OVERHEAD
+    y = newton_step(x, y);
+    y = newton_step(x, y);
     
     return y;
 }
