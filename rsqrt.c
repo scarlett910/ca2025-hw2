@@ -77,18 +77,6 @@ static inline unsigned clz(uint32_t x) {
     }
     return n;
 }
-static inline uint32_t find_msb(uint32_t x) {
-    if (x == 0) return 0;
-    
-    uint32_t position = 0;
-    if (x >= (1u << 16)) { x >>= 16; position += 16; }
-    if (x >= (1u << 8))  { x >>= 8;  position += 8; }
-    if (x >= (1u << 4))  { x >>= 4;  position += 4; }
-    if (x >= (1u << 2))  { x >>= 2;  position += 2; }
-    if (x >= (1u << 1))  { position += 1; }
-    
-    return position;
-}
 
 static inline uint32_t newton_step(uint32_t x, uint32_t y) {
     uint32_t y2 = ((uint64_t)y * y) >> 16;
