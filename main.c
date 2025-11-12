@@ -264,7 +264,7 @@ static bool test_uf8_roundtrip(void) {
 }
 
 /* ================================================
- * HÀM MAIN() CHÍNH
+ * MAIN()
  * ================================================ */
 int main(void) {
     uint64_t start_cycles, end_cycles, cycles_elapsed;
