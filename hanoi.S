@@ -1,13 +1,6 @@
     .text
     .globl hanoi_asm
 
-# -------------------------------------------------------
-# void hanoi_asm(void)
-# Computes iterative Hanoi solution for 3 disks
-# Prints moves using rv32emu syscalls (a7=64 = write)
-# Returns normally (with ret)
-# -------------------------------------------------------
-
 hanoi_asm:
     addi    x2, x2, -56
     sw      x8,  0(x2)
@@ -78,9 +71,6 @@ handle_large:
     sub     x19, x19, x18
     sub     x19, x19, x6
 
-# -------------------------------------------------------
-# PRINTING PHASE
-# -------------------------------------------------------
 display_move:
     # x9  = disk index
     # x18 = source peg index
@@ -191,3 +181,4 @@ str1:        .asciz  "Move Disk "
 str2:        .asciz  " from "
 str3:        .asciz  " to "
 char_buffer: .space  1
+
