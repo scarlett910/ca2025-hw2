@@ -89,7 +89,7 @@ uint32_t rsqrt(uint32_t x) {
     uint32_t y_base = rsqrt_table[exp];
     uint32_t y_next = (exp == 31) ? 1 : rsqrt_table[exp + 1];
     
-    // Linear interpolation - DÙNG SHIFT thay vì CHIA!
+    // Linear interpolation
     uint32_t delta = y_base - y_next;
     uint64_t frac_num_scaled = (uint64_t)(x - (1U << exp)) << 16;
     uint32_t frac = (uint32_t)(frac_num_scaled >> exp);
