@@ -7,8 +7,8 @@ LINKER_SCRIPT = linker.ld
 EMU ?= ../../../build/rv32emu
 
 AFLAGS = -g $(ARCH) -mabi=ilp32
-CFLAGS = -g -march=rv32i_zicsr -mabi=ilp32
-LDFLAGS = -T $(LINKER_SCRIPT) -m elf32lriscv
+CFLAGS = -g -march=rv32i_zicsr -mabi=ilp32 -ffreestanding
+LDFLAGS = -T $(LINKER_SCRIPT)
 EXEC = test.elf
 
 CC = $(CROSS_COMPILE)gcc
@@ -23,7 +23,7 @@ OBJS = start.o main.o perfcounter.o hanoi.o
 all: $(EXEC)
 
 $(EXEC): $(OBJS) $(LINKER_SCRIPT)
-	$(LD) $(LDFLAGS) -o $@ $(OBJS)
+	$(CC) $(LDFLAGS) $(CFLAGS) $(OPT_LEVEL) -o $@ $(OBJS) -nostdlib -lgcc
 
 %.o: %.S
 	$(AS) $(AFLAGS) $< -o $@
@@ -42,3 +42,12 @@ dump: $(EXEC)
 
 clean:
 	rm -f $(EXEC) $(OBJS)
+
+O_LEVELS = Ofast Os
+
+all_multi: $(O_LEVELS:%=test_%.elf)
+
+test_%.elf:
+	$(MAKE) clean
+	$(MAKE) CFLAGS="-g -$* -march=rv32i_zicsr -mabi=ilp32"
+	mv test.elf test_$*.elf
